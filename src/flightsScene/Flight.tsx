@@ -1,28 +1,38 @@
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
-import { Group, Quaternion } from 'three';
-import { EARTH_SURFACE_HEIGHT, FLOAT_HEIGHT, LEFT, PLANE_SCALE } from '../constants';
+import { Group, Quaternion, Vector3 } from 'three';
+import { EARTH_SURFACE_HEIGHT, FLOAT_HEIGHT, GLOBE_BASE_RADIUS, GLOBE_SCALE, LEFT, PLANE_SCALE } from '../constants';
 import Plane from '../models/Plane';
+import { IAirport } from '../types';
+import { getRotationForDirection, rotationQuaternionForCoordinates } from '../Utilities';
 
-export default function Flight() {
-  const rotationGroup = useRef<Group>();
+export default function Flight({ from, to }: { from: IAirport; to: IAirport }) {
+  const rotationBoxRef = useRef<Group>();
+  const flightContainerRef = useRef<Group>();
+
+  const fromQuaternion = rotationQuaternionForCoordinates(from.latitude, from.latitude);
+  const toQuaternion = rotationQuaternionForCoordinates(to.latitude, to.longitude);
 
   useFrame((state, delta) => {
-    // cycle of 4secs
-    const phase = (state.clock.elapsedTime % 4) / 4;
+    const phase = (state.clock.elapsedTime % 5) / 5;
 
-    const q = new Quaternion();
+    if (flightContainerRef.current && rotationBoxRef.current) {
+      const q = new Quaternion();
+      q.slerpQuaternions(fromQuaternion, toQuaternion, phase);
 
-    if (rotationGroup.current) {
-      q.setFromAxisAngle(LEFT, phase * Math.PI * 2);
-      rotationGroup.current?.setRotationFromQuaternion(q);
-      // rotationGroup.current.rotateOnAxis(LEFT, 0.1);
+      const worldPositionBefore = new Vector3();
+      flightContainerRef.current?.getWorldPosition(worldPositionBefore);
+
+      rotationBoxRef.current?.setRotationFromQuaternion(q);
+
+      flightContainerRef.current?.lookAt(worldPositionBefore);
+      flightContainerRef.current.rotation.z = getRotationForDirection(from, to);
     }
   });
 
   return (
-    <group ref={rotationGroup}>
-      <group position-y={EARTH_SURFACE_HEIGHT + FLOAT_HEIGHT}>
+    <group ref={rotationBoxRef}>
+      <group ref={flightContainerRef} position-y={GLOBE_BASE_RADIUS * GLOBE_SCALE + FLOAT_HEIGHT}>
         <Plane scale={PLANE_SCALE} />
       </group>
     </group>

@@ -3,29 +3,40 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
 import { PointLight } from 'three';
 import Globe from '../models/Globe';
+import { IAirport, IFlight } from '../types';
 import Flight from './Flight';
+import Sun from './Sun';
 
 export default function FlightsScene() {
-  const [intensity, setIntensity] = useState<number>(0);
-  const lightRef = useRef<PointLight>();
+  const [airportsList, setAirportsList] = useState<IAirport[]>([]);
+  const [flightsList, setFlightsList] = useState<IFlight[]>([]);
 
-  useFrame((state) => {
-    const phase = (state.clock.elapsedTime % 3) / 3;
-    const phaseRadians = Math.PI * 2 * phase;
+  useEffect(() => {
+    fetch('/data/airports.json')
+      .then((e) => e.json())
+      .then((airportsData) => {
+        setAirportsList(airportsData);
+      });
+  }, []);
 
-    if (lightRef.current) {
-      const x = Math.sin(phaseRadians) * 10;
-      const z = Math.cos(phaseRadians) * 10;
-      lightRef.current.position.set(x, 0, z);
-    }
-  });
+  useEffect(() => {
+    fetch('/data/flights.json')
+      .then((e) => e.json())
+      .then((flightsData) => {
+        setFlightsList(flightsData);
+      });
+  }, []);
+
+  const sydney = airportsList.find((e) => e.id === 'SYD');
+  const budapest = airportsList.find((e) => e.id === 'BUD');
 
   return (
     <>
       <OrbitControls />
-      <pointLight ref={lightRef} intensity={0.5} position={[2, 2, 2]} />
+      <Sun />
       <Globe />
-      <Flight />
+      {sydney && budapest && <Flight from={sydney} to={budapest} />}
+      {budapest && sydney && <Flight from={budapest} to={sydney} />}
     </>
   );
 }
