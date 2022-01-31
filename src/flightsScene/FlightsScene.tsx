@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { indexBy } from 'ramda';
 import { useEffect, useRef, useState } from 'react';
 import { PointLight } from 'three';
+import Airport from '../components/Airport';
 import Globe from '../models/Globe';
 import { IAirport, IFlight } from '../types';
 import { parseFlightDates } from '../Utilities';
@@ -49,6 +50,9 @@ export default function FlightsScene() {
         } else {
           return null;
         }
+      })}
+      {airportsList.map((airport) => {
+        return <Airport key={airport.id} airport={airport} />;
       })}
     </>
   );
