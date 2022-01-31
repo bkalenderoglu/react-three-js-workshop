@@ -33,7 +33,7 @@ export default function Plane({ ...props }: JSX.IntrinsicElements['group']) {
   const group = useRef<THREE.Group>();
   const { nodes, materials } = useGLTF(PATH_TO_MODEL) as GLTFResult;
   return (
-    <group ref={group} {...props} scale={PLANE_SCALE} dispose={null}>
+    <group ref={group} {...props} dispose={null}>
       <group
         position={PLANE_ROOT_NODE_POSITION}
         rotation={PLANE_ROOT_NODE_ROTATION}
