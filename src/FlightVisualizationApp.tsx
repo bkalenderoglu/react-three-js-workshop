@@ -1,15 +1,15 @@
 import './App.css';
 
 import React from 'react';
-import { Box } from './Utilities';
 import { Canvas } from '@react-three/fiber';
+import FlightsScene from './flightsScene/FlightsScene';
 
 function FlightVisualizationApp() {
   return (
     <div className="App">
       <React.Suspense fallback={<div>Loading data...ð</div>}>
         <Canvas id="canvas">
-          <Box />
+          <FlightsScene />
         </Canvas>
       </React.Suspense>
     </div>
